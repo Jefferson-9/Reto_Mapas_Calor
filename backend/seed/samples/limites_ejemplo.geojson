@@ -1,0 +1,10 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {"codigo": "LOJ-VAL-05", "nombre": "Barrio de ejemplo (DEMO)", "tipo_zona": "barrio", "zona_superior_codigo": "LOJ-VAL", "hogares_estimados": 600, "fuente_oficial": "DEMO (sintético)", "agencia_codigo": "MATRIZ"},
+      "geometry": {"type": "Polygon", "coordinates": [[[-79.1800, -3.9520], [-79.1740, -3.9520], [-79.1740, -3.9465], [-79.1800, -3.9465], [-79.1800, -3.9520]]]}
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.coverage
+htmlcov
+db.sqlite3
+media
+private_uploads
+staticfiles
+.env
+.env.*
+.git
+dist
+node_modules

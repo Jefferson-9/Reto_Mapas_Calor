@@ -1,0 +1,4 @@
+pytest
+pytest-django
+ruff
+pip-audit

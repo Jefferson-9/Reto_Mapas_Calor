@@ -1,0 +1,185 @@
+@import "tailwindcss";
+@import "./glass.css";
+
+/* ===== Tokens de identidad COAC (sección 10.1) ===== */
+@theme {
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --color-ink: #10223d;
+  --color-ink-2: #3b4c66;
+  --color-muted: #55657d; /* oscurecido desde #66758b para cumplir AA sobre vidrio */
+  --color-brand-50: #eef5fd;
+  --color-brand-100: #d7e7f9;
+  --color-brand-200: #b0cff2;
+  --color-brand-400: #4a8fd8;
+  --color-brand-500: #1f70c4;
+  --color-brand-600: #0f5daa;
+  --color-brand-700: #0b4a8f;
+  --color-brand-900: #082a52;
+  --color-sun-100: #ffefb8;
+  --color-sun-300: #ffd34f;
+  --color-sun-400: #fbc42a;
+  --color-sun-500: #f5b400;
+  --color-sun-600: #d89a00;
+  --color-sun-700: #8a6100;
+  --color-ivory: #f6f1e6;
+  --color-champagne: #ece2cb;
+  --color-ok: #2e9e6b;
+  --color-ok-ink: #1d6b48;
+  --color-warn: #e8920c;
+  --color-warn-ink: #8a4f00;
+  --color-danger: #c8341c;
+  --color-danger-ink: #9e2410;
+
+  --radius-panel: 1.875rem; /* 30 px */
+  --radius-card: 1.375rem; /* 22 px */
+  --radius-control: 0.9375rem; /* 15 px */
+  --radius-pill: 999px;
+
+  --ease-out-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+:root {
+  color-scheme: light;
+  --glass-specular-opacity: 0.55;
+  --glass-specular-size: 220px;
+  --bar-h: 76px;
+  --rail-w: 76px;
+  --gap: 20px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply font-sans text-ink;
+    min-height: 100dvh;
+    background-color: var(--color-ivory);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    letter-spacing: -0.006em;
+    overflow-x: hidden;
+  }
+  h1, h2, h3 {
+    letter-spacing: -0.028em;
+    line-height: 1.1;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--color-sun-300) 60%, transparent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+  input, select, textarea, button {
+    font: inherit;
+  }
+  /* Evita el zoom involuntario de iOS: campos de al menos 16 px en pantallas táctiles */
+  @media (pointer: coarse) {
+    input, select, textarea {
+      font-size: 16px !important;
+    }
+  }
+}
+
+@layer utilities {
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  .display {
+    letter-spacing: -0.028em;
+    line-height: 1.05;
+  }
+  .rounded-panel {
+    border-radius: var(--radius-panel);
+  }
+  .rounded-card {
+    border-radius: var(--radius-card);
+  }
+  .rounded-control {
+    border-radius: var(--radius-control);
+  }
+  .thin-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(16 34 61 / 0.18) transparent;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .press {
+    transition: transform 100ms ease-out, background-color 160ms ease, box-shadow 160ms ease, color 160ms ease;
+  }
+  .press:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  .sr-only-focusable:not(:focus) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+}
+
+/* ===== Fondo cálido con destellos (sección 10.1) ===== */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background:
+    radial-gradient(60rem 40rem at 6% -8%, rgb(31 112 196 / 0.2), transparent 60%),
+    radial-gradient(52rem 38rem at 104% 104%, rgb(245 180 0 / 0.22), transparent 60%),
+    radial-gradient(40rem 30rem at 72% 18%, rgb(255 255 255 / 0.8), transparent 70%),
+    linear-gradient(180deg, #f6f1e6 0%, #f1e9d8 55%, #ece2cb 100%);
+}
+.backdrop svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ===== MapLibre armonizado con el cristal ===== */
+.maplibregl-map {
+  font-family: var(--font-sans);
+}
+.maplibregl-ctrl-attrib {
+  background: rgb(255 255 255 / 0.72) !important;
+  backdrop-filter: blur(10px);
+  border-radius: 10px 0 0 0;
+  font-size: 11px;
+}
+.maplibregl-ctrl-group {
+  border-radius: 14px !important;
+  overflow: hidden;
+  box-shadow: 0 8px 24px -10px rgb(16 34 61 / 0.35) !important;
+  background: rgb(255 255 255 / 0.85) !important;
+  backdrop-filter: blur(16px);
+}
+.maplibregl-ctrl-group button {
+  width: 44px !important;
+  height: 44px !important;
+}
+.maplibregl-popup-content {
+  border-radius: 14px !important;
+  background: rgb(255 255 255 / 0.92) !important;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 28px -12px rgb(16 34 61 / 0.35) !important;
+  color: var(--color-ink);
+  font-size: 13px;
+  padding: 10px 12px !important;
+}
+
+@media print {
+  .no-print, .backdrop {
+    display: none !important;
+  }
+}

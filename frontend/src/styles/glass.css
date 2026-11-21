@@ -1,0 +1,142 @@
+/* ===== Materiales de cristal líquido (secciones 10.2, 10.4 y 10.5) =====
+   Cristal suave y luminoso: relleno blanco translúcido, borde casi imperceptible de luz,
+   brillo interior fino y sombra amplia y difusa. Sin contornos oscuros. */
+
+@layer components {
+
+
+.glass,
+.glass-strong,
+.glass-bar {
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(150deg, rgb(255 255 255 / 0.68), rgb(255 255 255 / 0.44));
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgb(255 255 255 / 0.75);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.95),
+    0 1px 2px rgb(16 34 61 / 0.03),
+    0 18px 44px -20px rgb(16 34 61 / 0.22);
+}
+/* Elevación mayor: barra superior, sidebar, modales */
+.glass-strong,
+.glass-bar {
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.78), rgb(250 246 236 / 0.58));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 1),
+    0 2px 6px rgb(16 34 61 / 0.04),
+    0 26px 60px -26px rgb(16 34 61 / 0.3);
+}
+/* Sub-tarjeta dentro de un panel (no se apila vidrio sobre vidrio: es casi opaca) */
+.glass-inset {
+  background: rgb(255 255 255 / 0.62);
+  border: 1px solid rgb(255 255 255 / 0.85);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 6px 18px -14px rgb(16 34 61 / 0.25);
+}
+/* Superficie de control (campos, píldoras) */
+.glass-control {
+  background: rgb(255 255 255 / 0.72);
+  border: 1px solid rgb(255 255 255 / 0.9);
+  box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgb(16 34 61 / 0.06);
+}
+
+/* ---- Brillo especular (useSpecularHover actualiza --mx/--my sin re-renderizar) ---- */
+.specular {
+  --mx: 50%;
+  --my: 50%;
+  --spec: 0;
+}
+.specular::before,
+.specular::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: calc(var(--spec) * var(--glass-specular-opacity));
+  transition: opacity 220ms ease-out;
+}
+/* (1) resplandor */
+.specular::before {
+  z-index: 0;
+  background: radial-gradient(var(--glass-specular-size) circle at var(--mx) var(--my), rgb(255 255 255 / 0.75), rgb(255 255 255 / 0) 70%);
+  mix-blend-mode: soft-light;
+}
+/* (2) brillo en el borde de 1 px recortado por máscara */
+.specular::after {
+  z-index: 1;
+  padding: 1px;
+  background: radial-gradient(calc(var(--glass-specular-size) * 0.8) circle at var(--mx) var(--my), rgb(255 255 255 / 1), rgb(255 255 255 / 0) 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.specular[data-spec="on"] {
+  --spec: 1;
+}
+.specular > * {
+  position: relative;
+  z-index: 2;
+}
+.specular:focus-visible {
+  --spec: 1;
+  --mx: 50%;
+  --my: 50%;
+}
+@supports not ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
+  .specular::after {
+    display: none;
+  }
+}
+
+/* Teléfonos: menos desenfoque y sombras más ligeras (rendimiento) */
+@media (max-width: 767px) {
+  .glass,
+  .glass-strong,
+  .glass-bar {
+    -webkit-backdrop-filter: blur(16px) saturate(170%);
+    backdrop-filter: blur(16px) saturate(170%);
+  }
+}
+
+/* Sin soporte de backdrop-filter: superficies sólidas cálidas */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass,
+  .glass-strong,
+  .glass-bar {
+    background: #fbf8f1;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-strong,
+  .glass-bar {
+    background: #fbf8f1;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .specular::before {
+    display: none;
+  }
+}
+@media (prefers-contrast: more) {
+  .glass,
+  .glass-strong,
+  .glass-bar,
+  .glass-inset {
+    background: #fff;
+    border-color: rgb(16 34 61 / 0.45);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .specular::before,
+  .specular::after {
+    transition: none;
+  }
+  .press:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+}

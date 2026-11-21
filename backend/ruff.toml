@@ -1,0 +1,11 @@
+line-length = 190
+target-version = "py312"
+extend-exclude = ["**/migrations/**"]
+
+[lint]
+select = ["E", "F", "W", "B", "I"]
+# zip() de longitudes distintas es intencional (pares consecutivos)
+ignore = ["B905"]
+
+[lint.isort]
+known-first-party = ["config", "core", "modules", "conftest"]

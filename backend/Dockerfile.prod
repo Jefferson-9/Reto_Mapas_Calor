@@ -1,0 +1,21 @@
+# Imagen de producción del backend: sin dependencias de desarrollo, usuario sin privilegios y Gunicorn.
+FROM python:3.12-slim-trixie
+
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gdal-bin libgdal-dev libgeos-dev libproj-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --uid 10001 coac \
+    && mkdir -p /data/private_uploads && chown coac /data/private_uploads
+
+WORKDIR /app
+COPY requirements/base.txt requirements/base.txt
+RUN pip install -r requirements/base.txt
+COPY --chown=coac . .
+RUN DJANGO_SECRET_KEY=solo-para-collectstatic-no-se-usa-en-ejecucion-0000000000 CEDULA_HMAC_KEY=x POSTGRES_DB=x POSTGRES_USER=x POSTGRES_PASSWORD=x \
+    DJANGO_ALLOWED_HOSTS=localhost DJANGO_TRUSTED_ORIGINS=http://localhost DJANGO_SETTINGS_MODULE=config.settings.base \
+    python manage.py collectstatic --noinput
+
+USER coac
+EXPOSE 8000
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120", "--access-logfile", "-"]
