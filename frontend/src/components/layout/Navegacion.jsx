@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { Lock, MoreHorizontal, PanelLeftClose, PanelLeftOpen, WifiOff } from 'lucide-react'
+import { Lock, MoreHorizontal, WifiOff } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router'
 import { destinosVisibles } from '../../app/navegacion'
@@ -32,16 +32,25 @@ function useMotivoBloqueo() {
   return (i) => (sinRed && !funcionaSinConexion(i.to) ? 'requiere conexión' : i.interruptor && !parametros?.[i.interruptor] ? 'no habilitado' : null)
 }
 
-function ItemRail({ item, bloqueado }) {
+function ItemRail({ item, bloqueado, activo, expandida, alPulsar }) {
   const spec = useSpecularHover()
   const [tip, setTip] = useState(false)
   const Icono = item.icono
+  const accion = activo ? (expandida ? 'cerrar el menú' : 'abrir el menú') : 'ir a la sección'
   return (
     <li className="relative" onPointerEnter={() => setTip(true)} onPointerLeave={() => setTip(false)}>
       <NavLink
         ref={spec}
         to={item.to}
-        aria-label={item.etiqueta + (bloqueado ? ` (${bloqueado})` : '')}
+        aria-label={`${item.etiqueta}: ${accion}${bloqueado ? ` (${bloqueado})` : ''}`}
+        aria-expanded={activo ? expandida : undefined}
+        aria-controls={activo ? 'sidebar-expandida' : undefined}
+        onClick={(evento) => {
+          // Conservar Ctrl/Cmd + clic y otras formas de abrir enlaces en otra pestaña.
+          if (evento.defaultPrevented || evento.button !== 0 || evento.metaKey || evento.ctrlKey || evento.shiftKey || evento.altKey) return
+          if (activo) evento.preventDefault()
+          alPulsar(activo)
+        }}
         onFocus={() => setTip(true)}
         onBlur={() => setTip(false)}
         className={({ isActive }) =>
@@ -54,6 +63,7 @@ function ItemRail({ item, bloqueado }) {
       {tip && (
         <span role="tooltip" className="glass-strong pointer-events-none absolute top-1/2 left-full z-50 ml-3 w-max -translate-y-1/2 rounded-xl px-3 py-1.5 text-xs font-semibold text-ink">
           {item.etiqueta}
+          {activo && <span className="block font-medium text-muted">Pulsa para {expandida ? 'cerrar' : 'abrir'} el menú</span>}
           {bloqueado === 'requiere conexión' && <span className="block font-medium text-muted">Requiere conexión</span>}
         </span>
       )}
@@ -99,7 +109,7 @@ function ListaExpandida({ grupos, alNavegar }) {
   )
 }
 
-/** Barra lateral flotante en cápsula: rail de íconos ↔ panel expandido (spring interrumpible, solo transform). */
+/** Barra lateral: clic en otra sección navega; clic en la sección activa alterna el panel. */
 export function FloatingSidebar() {
   const { puede } = useAuth()
   const motivo = useMotivoBloqueo()
@@ -107,11 +117,11 @@ export function FloatingSidebar() {
   const [expandida, setExpandida] = useState(leerPreferencia)
   const reducido = useReducedMotion()
   const { pathname } = useLocation()
-  const toggleSpec = useSpecularHover()
   const cambiar = (v) => {
     setExpandida(v)
     guardarPreferencia(v)
   }
+  const alPulsarItem = (activo) => cambiar(activo ? !expandida : false)
   useEffect(() => {
     if (!expandida) return undefined
     const k = (e) => e.key === 'Escape' && cambiar(false)
@@ -124,22 +134,16 @@ export function FloatingSidebar() {
       <nav aria-label="Navegación (íconos)" className="glass-strong flex h-auto max-h-full w-[var(--rail-w)] flex-col items-center gap-2 rounded-full px-3 py-4">
         <ul className="thin-scroll no-scrollbar flex min-h-0 flex-col items-center gap-2 overflow-y-auto">
           {grupos.flatMap((g) => g.items).map((i) => (
-            <ItemRail key={i.to} item={i} bloqueado={motivo(i)} />
+            <ItemRail
+              key={i.to}
+              item={i}
+              bloqueado={motivo(i)}
+              activo={pathname === i.to || pathname.startsWith(`${i.to}/`)}
+              expandida={expandida}
+              alPulsar={alPulsarItem}
+            />
           ))}
         </ul>
-        <div className="mt-2 border-t border-white/80 pt-3">
-          <button
-            ref={toggleSpec}
-            type="button"
-            onClick={() => cambiar(!expandida)}
-            aria-expanded={expandida}
-            aria-controls="sidebar-expandida"
-            aria-label={expandida ? 'Contraer navegación' : 'Expandir navegación'}
-            className="press specular grid size-12 place-items-center rounded-full bg-white text-brand-600 shadow-[0_10px_22px_-10px_rgb(16_34_61/0.45)]"
-          >
-            {expandida ? <PanelLeftClose className="size-5" aria-hidden /> : <PanelLeftOpen className="size-5" aria-hidden />}
-          </button>
-        </div>
       </nav>
       <AnimatePresence>
         {expandida && (
@@ -151,7 +155,7 @@ export function FloatingSidebar() {
             animate={{ opacity: 1, x: 0, transition: spring }}
             exit={reducido ? { opacity: 0 } : { opacity: 0, x: -24, transition: { duration: 0.16 } }}
           >
-            <ListaExpandida grupos={grupos} />
+            <ListaExpandida grupos={grupos} alNavegar={() => cambiar(false)} />
           </motion.aside>
         )}
       </AnimatePresence>
