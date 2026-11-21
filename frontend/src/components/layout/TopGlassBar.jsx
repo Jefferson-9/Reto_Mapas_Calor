@@ -2,7 +2,6 @@ import { Bell, CalendarDays, ChevronDown, LogOut, MapPin, SlidersHorizontal, Use
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { api } from '../../api/client'
-import logo from '../../assets/logo.png'
 import { useAuth } from '../../context/AuthContext'
 import { useFiltros } from '../../context/FiltrosContext'
 import { useMediaQuery } from '../../hooks/useApi'
@@ -155,7 +154,7 @@ export function TopGlassBar() {
       <div className="glass-bar flex h-[64px] items-center gap-2 rounded-panel pr-2 pl-3 md:h-[var(--bar-h)] md:gap-3 md:pr-3 md:pl-4">
         <Link to="/panel" className="flex min-w-0 shrink-0 items-center gap-3 rounded-2xl" aria-label="Ir al panel">
           <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-[14px] bg-white shadow-[0_6px_16px_-8px_rgb(16_34_61/0.4)]">
-            <img src={logo} alt="Logo COAC Padre Julián Lorente" className="h-9 w-auto object-contain" style={{ objectPosition: 'left center', width: 36, objectFit: 'cover' }} />
+            <img src="/logo-icono.png" alt="" className="h-9 w-9 object-contain"/>
           </span>
           <span className="hidden min-w-0 leading-tight sm:block">
             <span className="block truncate text-[15px] font-bold tracking-[-0.02em] text-ink">COAC Padre Julián Lorente</span>
