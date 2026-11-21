@@ -1,0 +1,83 @@
+# Entorno de desarrollo: docker compose up --build
+name: coac-mapas
+
+services:
+  db:
+    image: postgis/postgis:16-3.5
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Define POSTGRES_DB en .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Define POSTGRES_USER en .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    # Sin puertos publicados: solo accesible desde la red interna de Compose.
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      target: dev
+    env_file: .env
+    environment:
+      POSTGRES_HOST: db
+    volumes:
+      - ./backend:/app
+      - private_uploads:/data/private_uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/v1/health/').status==200 else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:8000
+      VITE_MAP_STYLE_URL: ${VITE_MAP_STYLE_URL:-https://tiles.openfreemap.org/styles/positron}
+      VITE_USE_POLLING: "1"
+    volumes:
+      - ./frontend:/app
+      # node_modules en volumen nombrado: no se mezclan dependencias de Windows y Linux
+      - frontend_node_modules:/app/node_modules
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5173:5173"
+    restart: unless-stopped
+
+  # Pruebas E2E con navegador real (Chromium headless). Uso: docker compose --profile e2e run --rm e2e
+  e2e:
+    image: mcr.microsoft.com/playwright:v1.65.1-noble
+    profiles: ["e2e"]
+    working_dir: /app
+    env_file: .env
+    environment:
+      E2E_BASE_URL: http://frontend:5173
+      CI: "1"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    depends_on:
+      frontend:
+        condition: service_started
+    command: ["npx", "playwright", "test"]
+
+volumes:
+  pgdata:
+  private_uploads:
+  frontend_node_modules:

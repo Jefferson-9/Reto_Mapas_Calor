@@ -1,0 +1,6 @@
+codigo_socio,cedula,nombre,agencia_codigo,fecha_ingreso,latitud,longitud,rango_ingreso,direccion
+S-91001,1199000101,Ejemplo Uno Sintético,MATRIZ,2026-11-03,-3.996500,-79.201500,500-1000,Calle de ejemplo 1
+S-91002,1199000102,Ejemplo Dos Sintético,MATRIZ,2026-11-05,-3.985000,-79.229500,0-500,Calle de ejemplo 2
+S-91003,1199000103,Ejemplo Tres Sintético,SUR,2026-11-06,-4.010500,-79.204500,1000-2000,Calle de ejemplo 3
+S-91004,1199000104,Ejemplo Cuatro Sintético,CATAMAYO,07/11/2026,-3.987000,-79.357000,500-1000,Calle de ejemplo 4
+S-91005,1199000105,Ejemplo Cinco Sintético,MATRIZ,2026-11-08,-3.958700,-79.203200,0-500,Calle de ejemplo 5

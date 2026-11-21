@@ -1,0 +1,6 @@
+codigo_credito,codigo_socio,monto,fecha_desembolso,plazo_meses,estado
+C-91001,S-91001,2500.00,2026-11-10,12,vigente
+C-91002,S-91002,4800.50,2026-11-11,24,vigente
+C-91003,S-99999,3000.00,2026-11-12,18,vigente
+C-91004,S-91003,abc,2026-11-12,18,vigente
+C-91005,S-91004,1500.00,2026-11-13,12,pendiente

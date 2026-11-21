@@ -1,23 +1,61 @@
-# React
-frontend/node_modules/
-frontend/dist/
+# =======================
+# FRONTEND - React / Vite
+# =======================
+node_modules/
+dist/
+coverage/
+test-results/
+playwright-report/
+blob-report/
 
-# Python
+# =================
+# BACKEND - Python
+# =================
 __pycache__/
 *.py[cod]
-backend/.venv/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
-# Django
-backend/db.sqlite3
+# ========
+# DJANGO
+# ========
+*.sqlite3
+staticfiles/
+media/
+private_uploads/
+uploads_privados/
 
-# Variables de entorno
+# =========================
+# BASE DE DATOS Y RESPALDOS
+# =========================
+backups/
+*.dump
+*.backup
+
+# ====================
+# VARIABLES DE ENTORNO
+# ====================
 .env
 .env.*
 !.env.example
 
-# IDE
-.vscode/
+# ====
+# LOGS
+# ====
+*.log
 
-# Sistema operativo
+# =========
+# EDITORES
+# =========
+.vscode/
+.idea/
+
+# =================
+# SISTEMA OPERATIVO
+# =================
 .DS_Store
 Thumbs.db

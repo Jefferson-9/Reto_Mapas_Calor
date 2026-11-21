@@ -1,0 +1,58 @@
+# Perfil de producción: PREPARADO, NO PROBADO EN UN SERVIDOR REAL (ver DEPLOYMENT.md).
+# Uso: docker compose -f docker-compose.prod.yml --env-file .env.produccion up -d --build
+name: coac-mapas-prod
+
+services:
+  db:
+    image: postgis/postgis:16-3.5
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      retries: 10
+    restart: always
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    env_file: .env.produccion
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      POSTGRES_HOST: db
+      RUN_MIGRATIONS: "0" # las migraciones son un paso controlado (ver DEPLOYMENT.md)
+    volumes:
+      - private_uploads:/data/private_uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/v1/health/').status==200 else 1)\""]
+      interval: 15s
+      retries: 6
+    deploy:
+      resources:
+        limits: { cpus: "2", memory: 1g }
+    restart: always
+
+  web:
+    build:
+      context: .
+      dockerfile: deploy/nginx/Dockerfile
+      args:
+        VITE_MAP_STYLE_URL: ${VITE_MAP_STYLE_URL:-https://tiles.openfreemap.org/styles/positron}
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "80:80"
+    restart: always
+
+volumes:
+  pgdata:
+  private_uploads:
